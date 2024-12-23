@@ -1,0 +1,9 @@
+name = "serverless-blog"
+main = "src/index.ts"
+compatibility_date = "2024-12-23"
+
+# compatibility_flags = [ "nodejs_compat" ]
+
+[vars]
+DATABASE_URL = "prisma://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5IjoiODhkNzcyOTQtY2YxNC00NDM0LWFkMjAtYjQ3ZGMwOGMyMzBmIiwidGVuYW50X2lkIjoiNGQxMWQ4NGZkNzUyZTZjYzIyNTdlMTY0Y2ZkNTJmMDIzYmU1ZTMwMjAyNjAxMGE1YmY0ZjhkNGJjYzZmMTgwOCIsImludGVybmFsX3NlY3JldCI6IjM5ZTEzOTIzLTM1NGMtNDUyYy05ZDk5LTIzNTMwMGM3NzgzOSJ9.n62wzqFdYNNicbXHr6skXYEwihhyT_EYLqMkygzBUak"
+JWT_SECRET = "mysecretkey"
