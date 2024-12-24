@@ -21,21 +21,30 @@ blogRouter.use("/*", async(c, next) => {
     //pass it down to the route handler
 
     const authHeader = c.req.header("authorization") || "";
-    const user = await verify(authHeader, c.env.JWT_SECRET);
 
-    if(user){
-        const userId = String(user.id);
-        c.set("userId", userId);//basically you are fetching the user id from the token
-        //and then passing it to the the get handler
-        //set() and get() @hono/docs
-        
-        await next();
-    }else{
+    try{
+        const user = await verify(authHeader, c.env.JWT_SECRET);
+
+        if(user){
+            const userId = String(user.id);
+            c.set("userId", userId);//basically you are fetching the user id from the token
+            //and then passing it to the the get handler
+            //set() and get() @hono/docs
+            
+            await next();
+        }else{
+            c.status(403);
+            return c.json({
+                message: "You are not logged in"
+            })
+        }
+    }catch(e){
         c.status(403);
         return c.json({
             message: "You are not logged in"
         })
     }
+      
 })
 
 blogRouter.get('/bulk', async(c) =>{
