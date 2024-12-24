@@ -1,7 +1,7 @@
 import { decode, verify } from "hono/jwt";
 
 import { Hono } from "hono";
-import { PrismaClient } from "@prisma/client/extension";
+import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 
 export const blogRouter = new Hono<{
@@ -25,19 +25,35 @@ blogRouter.use("/*", async(c, next) => {
 
     if(user){
         const userId = String(user.id);
-        c.set("userId", userId);
-        next();
+        c.set("userId", userId);//basically you are fetching the user id from the token
+        //and then passing it to the the get handler
+        //set() and get() @hono/docs
+        
+        await next();
     }else{
         c.status(403);
         return c.json({
             message: "You are not logged in"
         })
     }
-    next();
 })
 
-blogRouter.get("/", async(c) => {
-    const body = await c.req.json();
+blogRouter.get('/bulk', async(c) =>{
+    const prisma = new PrismaClient({
+        datasourceUrl: c.env.DATABASE_URL,
+    }).$extends(withAccelerate());
+
+    const blogs = await prisma.blog.findMany();
+
+
+    return c.json({
+        blogs
+    })
+})
+
+blogRouter.get("/:id", async(c) => {
+    // const body = await c.req.json();
+    const id = c.req.param("id");
     const prisma = new PrismaClient({
         datasourceUrl: c.env.DATABASE_URL,
     }).$extends(withAccelerate());
@@ -46,7 +62,7 @@ blogRouter.get("/", async(c) => {
     try {
         const blog = await prisma.blog.findFirst({
             where: {
-                id: body.id,
+                id: Number(id),
             }
         })
 
@@ -62,8 +78,9 @@ blogRouter.get("/", async(c) => {
 });
 
 
-blogRouter.post("/api/v1/blog", async(c) => {
+blogRouter.post("/", async(c) => {
   const body = await c.req.json();
+  const authorId = c.get("userId");
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
@@ -72,7 +89,7 @@ blogRouter.post("/api/v1/blog", async(c) => {
     data: {
         title: body.title,
         content: body.content,
-        authorId: 1
+        authorId: Number(authorId)
     }
   })
 
@@ -81,7 +98,7 @@ blogRouter.post("/api/v1/blog", async(c) => {
   })
 });
 
-blogRouter.put("/api/v1/blog", async(c) => {
+blogRouter.put("/blog", async(c) => {
   const body = await c.req.json();
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
@@ -103,15 +120,4 @@ blogRouter.put("/api/v1/blog", async(c) => {
   })
 });
 
-blogRouter.get('/bulk', async(c) =>{
-    const prisma = new PrismaClient({
-        datasourceUrl: c.env.DATABASE_URL,
-    }).$extends(withAccelerate());
 
-    const blogs = await prisma.blog.findMany();
-
-
-    return c.json({
-        blogs
-    })
-})

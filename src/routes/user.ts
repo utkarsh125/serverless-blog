@@ -10,7 +10,7 @@ export const userRouter = new Hono<{
     }
 }>();
 
-userRouter.post("/api/v1/user/signup", async (c) => {
+userRouter.post("/signup", async (c) => {
   const body = await c.req.json();
 
   //Prisma initialization is needed inside each route
@@ -31,6 +31,7 @@ userRouter.post("/api/v1/user/signup", async (c) => {
     const jwt = await sign({
       id: user.id,
     }, c.env.JWT_SECRET);
+    
     return c.text(jwt);
 
     
@@ -41,7 +42,7 @@ userRouter.post("/api/v1/user/signup", async (c) => {
   }
 });
 
-userRouter.post("/api/v1/user/signin", async(c) => {
+userRouter.post("/signin", async(c) => {
   const body = await c.req.json();
 
   const prisma = new PrismaClient({
@@ -71,6 +72,5 @@ userRouter.post("/api/v1/user/signin", async(c) => {
     c.status(411);
     return c.text("Invalid");
   }
-
 
 });
